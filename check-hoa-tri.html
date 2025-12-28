@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ôn tập hóa trị</title>
+  <style>
+    /* Layout chung */
+    body {
+      margin: 0;
+      background: #0f172a;
+      color: #ffffff;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Cơ chế hiển thị theo trạng thái */
+    #login, #app {
+      display: none; /* ẩn mặc định cả hai */
+    }
+    body[data-state="login"] #login { display: block; }
+    body[data-state="app"]   #app   { display: block; }
+
+    /* Box login (PC giữ nguyên) */
+    .login-box {
+      background: linear-gradient(rgb(143, 143, 143), rgb(0, 0, 0));
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      width: 400px;
+      max-width: 90%;
+    }
+
+    input {
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      margin: 10px 0;
+      width: 200px;
+    }
+    button {
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: none;
+      background: #22c55e;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover { background: #16a34a; }
+
+    /* Box ứng dụng */
+    .app-box {
+      text-align: center;
+      padding: 20px;
+      width: 400px;
+      max-width: 90%;
+    }
+    #element {
+      font-size: 40px;
+      font-weight: bold;
+      margin: 20px 0 10px;
+    }
+    #answer {
+      font-size: 24px;
+      color: #60a5fa;
+      margin-bottom: 20px;
+    }
+
+    /* Hiệu ứng nháy xanh dương khi đổi nguyên tố */
+    .flash { animation: flashBlue 0.5s ease; }
+    @keyframes flashBlue {
+      0%   { color: #ffffff; }
+      50%  { color: #60a5fa; }
+      100% { color: #ffffff; }
+    }
+
+    /* Điện thoại: login lấp đầy màn hình, app giữ nguyên kích thước */
+    @media (max-width: 600px) {
+      body {
+        align-items: stretch;
+      }
+      .login-box {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      input, .login-box button {
+        width: 90%;
+        margin: 10px auto;
+      }
+    }
+  </style>
+</head>
+<body data-state="login">
+  <!-- Hộp nhập mật khẩu -->
+  <div id="login" class="login-box" role="dialog" aria-label="Đăng nhập">
+    <h2>Nhập mật khẩu để truy cập</h2>
+    <input type="password" id="password" placeholder="Mật khẩu" />
+    <br/>
+    <button type="button" onclick="checkPassword()">Đăng nhập</button>
+    <p id="error" style="color:#f87171;"></p>
+  </div>
+
+  <!-- Nội dung ứng dụng -->
+  <div id="app" class="app-box" role="application" aria-label="Ôn tập hóa trị">
+    <h1>Ôn tập hóa trị</h1>
+    <div id="element">—</div>
+    <div id="answer"></div>
+    <button type="button" onclick="randomElement()">Random nguyên tố</button>
+    <button type="button" onclick="showAnswer()">Hiện đáp án</button>
+  </div>
+
+  <script>
+    // Dữ liệu giữ nguyên như bạn cung cấp
+    const DATA = [
+      { symbol: "K", valence: "(I)" },
+      { symbol: "Na", valence: "(I)" },
+      { symbol: "Ba", valence: "(II)" },
+      { symbol: "Ca", valence: "(II)" },
+      { symbol: "Mg", valence: "(II)" },
+      { symbol: "Al", valence: "(III)" },
+      { symbol: "Mn", valence: "(II, IV, VII)" },
+      { symbol: "Zn", valence: "(II)" },
+      { symbol: "Fe", valence: "(II, III)" },
+      { symbol: "Pb", valence: "(II, IV)" },
+      { symbol: "Cu", valence: "(I, II)" },
+      { symbol: "Ag", valence: "(I)" },
+      { symbol: "Pt", valence: "(II, IV)" },
+      { symbol: "Au", valence: "(I, III)" },
+      { symbol: "C", valence: "(II, IV)" },
+      { symbol: "H", valence: "(I)" },
+      { symbol: "O", valence: "(II)" },
+      { symbol: "N", valence: "(II, III, IV,...)" },
+      { symbol: "S", valence: "(II, IV, VI)" },
+      { symbol: "P", valence: "( III, V)" },
+      { symbol: "Br", valence: "(I)" },
+      { symbol: "Cl", valence: "(I, ...)" },
+      { symbol: "Si", valence: "(IV)" },
+    ];
+
+    let currentIndex = null;
+
+    // Đặt trạng thái mặc định là 'login' khi tải trang
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.dataset.state = 'login';
+    });
+
+    // Kiểm tra mật khẩu
+    function checkPassword() {
+      const pw = document.getElementById("password").value;
+      if (pw === "ND2025") {
+        document.body.dataset.state = 'app';           // chuyển sang màn hình app
+        document.getElementById("error").textContent = "";
+        // Optional: focus vào nút Random cho mượt
+        setTimeout(() => {
+          const randomBtn = document.querySelector('#app button');
+          randomBtn && randomBtn.focus();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 0);
+      } else {
+        document.getElementById("error").textContent = "Sai mật khẩu!";
+      }
+    }
+
+    // Random nguyên tố
+    function randomElement() {
+      const idx = Math.floor(Math.random() * DATA.length);
+      currentIndex = idx;
+      const el = document.getElementById("element");
+      el.textContent = DATA[idx].symbol;
+      document.getElementById("answer").textContent = "";
+
+      // Nháy xanh dương báo hiệu đổi nguyên tố
+      el.classList.remove("flash");
+      void el.offsetWidth; // reset animation
+      el.classList.add("flash");
+    }
+
+    // Hiện đáp án
+    function showAnswer() {
+      if (currentIndex !== null) {
+        document.getElementById("answer").textContent = DATA[currentIndex].valence;
+      }
+    }
+  </script>
+</body>
+</html>
